@@ -34,8 +34,8 @@ int process(FILE *fmt, FILE *data, char ent_delim, char rec_delim)
 		mailmerge( tab, fmt );		/* merge with format	*/
 		clear_table(tab);		/* discard data		*/
 	}
-
-	free_table(tab);			/* no memory leaks!	*/
+	free_table(tab); 			/* no memory leaks!	*/
+	return(0);			
 }
 
 /**
@@ -159,6 +159,9 @@ struct arr_builder build_arrays(char c, int write_flag) {
 			val_arr[j] = '\0';
 			return ab;
 	}
+	strcpy(ab.tag, "\0");
+	strcpy(ab.val, "\0");
+	return ab;
 }
 /* END build_arrays */
 

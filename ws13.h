@@ -23,6 +23,7 @@ typedef struct symtab symtab_t;
 
 
 symtab_t  *new_table();
+void	free_table( symtab_t * p);
 int	  in_table(symtab_t *,char []);
 int	  insert(symtab_t *, char [], char []);
 char      *lookup(symtab_t *,char []);
@@ -32,6 +33,7 @@ char     *nextword(symtab_t *);
 int      table_len(symtab_t *);
 void     delete(symtab_t *,char []);
 void     clear_table(symtab_t *);
-void show_table(symtab_t *tab);
+void 	show_table(symtab_t *tab);
+int		table_export(symtab_t *tp);
 
 #endif	/* WS13_INCL */
