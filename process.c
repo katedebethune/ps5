@@ -247,18 +247,22 @@ if ( write_flag == WRITE_NONE ) {
 					else if ( strlen(tag_arr) > 1 ) {
 						tag_arr[i] = '\0'; /* close tag string */
 						curr_tab = in_table(tp, tag_arr);
+						/* ... current tag_arr is in the table, print its value to stdout ... */
 						if ( curr_tab ) {
 							printf("%s", (lookup(tp, tag_arr)));
 							write_flag = WRITE_FMT_CLS;
 						} 
+						/* ... tag_arr not in sym_tab, check to see if it is a system tag ... */
 						else if ( tag_arr[0] == UN_FMT_DELIM ) {
 							printf("Unix tag");
 							write_flag = WRITE_FMT_CLS;
 							//continue;
 						} 
+						/* ... tag_arr not in sym_tab & not a system var ... */
 						else if ( !curr_tab ) {
 							write_flag = WRITE_FMT_CLS;
 						}
+						/* ... reset tag_arr ... */
 						tag_arr[0] = val_arr[0] = '\0';
 						i = 0;
 					}
