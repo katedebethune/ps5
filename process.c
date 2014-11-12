@@ -213,12 +213,10 @@ if ( write_flag == WRITE_NONE ) {
  void	mailmerge( symtab_t *tp, FILE *fp) {
 	
 	int c, curr_tab, write_flag = WRITE_FMT_CLS;
-	static char tag_arr[MAXFLD + 1] = "\0", val_arr[MAXVAL + 1] = "\0", un_tag_arr[MAXFLD + 1] = "\0";
-	static int i = 0, j = 0;
+	static char tag_arr[MAXFLD + 1] = "\0", un_tag_arr[MAXFLD + 1] = "\0";
+	static int i = 0;
 	//struct arr_builder curr_fmt_vals;
 	//struct link curr_tab;
-	
-	//show_table(tp);
 	if ( strcmp(firstword(tp),"complete") == 0 && table_len(tp) > 1) {
 			while( ( c = fgetc(fp)) != EOF ) {
 				/* write_flag set to WRITE_NONE
@@ -256,7 +254,7 @@ if ( write_flag == WRITE_NONE ) {
 							write_flag = WRITE_FMT_CLS;
 						}
 						/* ... reset tag_arr ... */
-						tag_arr[0] = val_arr[0] = '\0';
+						tag_arr[0] = un_tag_arr[0] = '\0';
 						i = 0;
 					}
 					
