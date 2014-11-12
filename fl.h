@@ -6,21 +6,6 @@
 #define	MAXFLD	40
 #define	MAXVAL	120
 
-
-//#define ENTITY_DEL(x)
-//#if ( x == '\0' )
-//#define ENTITY_DELIM ';'
-//#else
-//#define ENTITY_DELIM ENTITY_DEL(x)
-//#endif
-
-//#define RECORD_DEL(y)
-//#if ( y == '\0' )
-//#define	RECORD_DELIM '\n'
-//#else
-//#define RECORD_DELIM RECORD_DEL(y)
-//#endif
-
 #define PAIR_DELIM '='
 #define	FMT_DELIM '%'
 #define UN_FMT_DELIM '!'
