@@ -67,7 +67,6 @@ int get_record(symtab_t *tp, FILE *fp, char ent_delim, char rec_delim )
 			write_flag = WRITE_TAG;		
 		}
 		/* Case 2a, there is no value string, = and ; sit next to each other */
-		//else if ( c == ENTITY_DELIM && prevchar == PAIR_DELIM ) {
 		else if ( c == ent_delim && prevchar == PAIR_DELIM ) {
 			write_flag = WRITE_NONE;
 		}
@@ -76,7 +75,6 @@ int get_record(symtab_t *tp, FILE *fp, char ent_delim, char rec_delim )
 			write_flag = WRITE_VAL;
 		}
 		/* Case 3 at the end of writing the value to its array, change flag to WRITE_NONE */
-		//else if ( (write_flag == WRITE_VAL && c == ENTITY_DELIM) || (write_flag == WRITE_VAL && c == RECORD_DELIM) ) {
 		else if ( (write_flag == WRITE_VAL && c == ent_delim) || (write_flag == WRITE_VAL && c == rec_delim) ) {
 			write_flag = WRITE_NONE;
 		}
@@ -86,7 +84,6 @@ int get_record(symtab_t *tp, FILE *fp, char ent_delim, char rec_delim )
 			break;
 		}
 		/* Case 4 - call to error - WRITE_TAG does not see its proper closing delimiter (PAIR_DELIM) */
-		//else if ( write_flag == WRITE_TAG && prevchar == ENTITY_DELIM ) {
 		else if ( write_flag == WRITE_TAG && prevchar == ent_delim ) {
 				fatal("Badly formed data file", " ");		
 		}
@@ -97,19 +94,13 @@ int get_record(symtab_t *tp, FILE *fp, char ent_delim, char rec_delim )
 				insert( tp, curr_vals.tag, curr_vals.val );
 			}
 			if ( c == EOF ) {
-				//if ( prevchar != RECORD_DELIM ) {
 				if ( prevchar != rec_delim ) {
 					insert( tp, "complete", "complete");
 				}
-				//printf ("c = %c; prevchar = %c\n", c, prevchar);
-				//printf("\nInside EOF && c == RECORD_DELIM, set stop flag loop\n");
 				return NO;
 			}
-			//else if ( c == RECORD_DELIM )
 			else if ( c == rec_delim ) {
 				insert( tp, "complete", "complete");
-				//printf("\nInside RECORD_DELIM loop\n");
-				//printf ("c = %c; prevchar = %c\n", c, prevchar);
 				return YES;
 			}
 		} 
@@ -222,7 +213,7 @@ if ( write_flag == WRITE_NONE ) {
  void	mailmerge( symtab_t *tp, FILE *fp) {
 	
 	int c, curr_tab, write_flag = WRITE_FMT_CLS;
-	static char tag_arr[MAXFLD + 1] = "\0", val_arr[MAXVAL + 1] = "\0";
+	static char tag_arr[MAXFLD + 1] = "\0", val_arr[MAXVAL + 1] = "\0", un_tag_arr[MAXFLD + 1] = "\0";
 	static int i = 0, j = 0;
 	//struct arr_builder curr_fmt_vals;
 	//struct link curr_tab;
@@ -254,9 +245,11 @@ if ( write_flag == WRITE_NONE ) {
 						} 
 						/* ... tag_arr not in sym_tab, check to see if it is a system tag ... */
 						else if ( tag_arr[0] == UN_FMT_DELIM ) {
-							printf("Unix tag");
+							strcpy(un_tag_arr, tag_arr+1);
+							fflush(stdout);
+							table_export(tp);
+							system(un_tag_arr);
 							write_flag = WRITE_FMT_CLS;
-							//continue;
 						} 
 						/* ... tag_arr not in sym_tab & not a system var ... */
 						else if ( !curr_tab ) {
