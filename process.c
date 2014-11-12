@@ -221,38 +221,31 @@ if ( write_flag == WRITE_NONE ) {
  
  void	mailmerge( symtab_t *tp, FILE *fp) {
 	
-	int c, write_flag = WRITE_FMT_CLS;
+	int c, curr_tab, write_flag = WRITE_FMT_CLS;
 	static char tag_arr[MAXFLD + 1] = "\0", val_arr[MAXVAL + 1] = "\0";
 	static int i = 0, j = 0;
-	struct arr_builder curr_fmt_vals;
+	//struct arr_builder curr_fmt_vals;
 	//struct link curr_tab;
-	int curr_tab;
 	
-	show_table(tp);
+	//show_table(tp);
 	if ( strcmp(firstword(tp),"complete") == 0 && table_len(tp) > 1) {
-			//printf("\nMailmerge found the complete marker\n");
-			//show_table(tp);
 			while( ( c = fgetc(fp)) != EOF ) {
-				//putchar(c);
 				/* write_flag set to WRITE_NONE
 				and a % is encountered, set write_flag to WRITE_FMT */
 				if ( c == FMT_DELIM && write_flag == WRITE_FMT_CLS ) {
 					write_flag = WRITE_FMT_OPN;
-					//printf("\nINSIDE write_flag = WRITE_FMT\n");
-					//continue;
 				}
 				else if ( write_flag == WRITE_FMT_OPN ) {
 					//printf("\nInside WRITE_FMT\n");
 					if ( c != FMT_DELIM ) {
 						tag_arr[i++] = c;
-						//printf("\ni = %d\n", i);
 					}
 					else if ( i == 0 && c == FMT_DELIM ) {
 						putchar('%');
 						write_flag = WRITE_FMT_CLS;
 					}	
-					else if ( strlen(tag_arr) > 1 && c == FMT_DELIM ) {
-						tag_arr[i] = '\0';
+					else if ( strlen(tag_arr) > 1 ) {
+						tag_arr[i] = '\0'; /* close tag string */
 						curr_tab = in_table(tp, tag_arr);
 						if ( curr_tab ) {
 							printf("%s", (lookup(tp, tag_arr)));
@@ -279,8 +272,8 @@ if ( write_flag == WRITE_NONE ) {
 			fseek(fp, 0L, 0);
 	}
 	else {
-			printf("\nMailmerge did not find complete\n");
-			//error out here
+			//printf("\nMailmerge did not find complete\n");
+			;
 	}
 	//exit(1);
 }

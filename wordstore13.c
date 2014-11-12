@@ -225,7 +225,7 @@ void
 clear_table(symtab_t *tp)
 {
 	/* under construction */
-	printf("\nINSIDE clear_table\n");
+	//printf("\nINSIDE clear_table\n");
 	//show_table(tp);
 	
 	struct link *linkp;
