@@ -1,0 +1,35 @@
+/*
+ * Conditions
+ */
+ 
+ 1. c = '\n'; return YES, tp is filled, mailmerge is called from process.
+ 2. c = ';';  change from reading val to reading fldname
+ 3. c = '=';  change from reading fieldname to value
+ 
+ FSM variables
+ read_name = NO;
+ read_val = NO;
+ 
+ (1)title(2)=(3)Mr.(4);(5)firstname=Alan;city=Boston
+
+(1) 
+read_name = YES;
+read_val = NO;
+(2) c == '=';
+(3) '=' is discarded; flags are changed
+read_name = NO;
+read_val = YES;
+(4) c == ';';
+(5) ';' is discarded
+(1)
+read_name = YES;
+read_val = NO;
+
+ERROR SITUATIONS
+1) no equals
+e.g. titleMr.;firstname=Alan;
+if read_name == YES && read_val == NO && strlen(fldnam) > 0 && c == ';';
+	triger fatal
+2) equals and no fieldname
+e.g. =Mr.;firstname=Alan;
+if read_name == NO && read_val == NO &&  c == '='

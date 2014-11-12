@@ -1,0 +1,80 @@
+/* ... EXCERPT FROM fl.c ... */
+
+int main(int ac, char *av[])
+{
+	. . .
+	
+	myname = *av;
+	static char ent_delim = '\0', rec_delim = '\0';
+
+	. . .
+	
+	/* ... process data command line ... */
+	/*  ... if only 2 args, take input fron stdin ... */
+	if ( ac == 2 ) {
+		process(fpfmt, stdin, ent_delim, rec_delim);
+	} 
+	/* ... otherwise, look for flags & file names ...*/
+	else {
+		for (int i = 2; i < ac; i++ ) {
+			//printf("\n%s\n", av[i] );
+			if ( av[i][0] == '-' ) {
+				switch (av[i][1]) {
+					case 'd': ent_delim=av[i][2];
+							  continue;
+					case 'D':  ent_delim='\n';
+							  continue;
+					case 'r': rec_delim=av[i][2];
+					           continue;	
+					default:  fatal("badly formed command line flag", " ");
+				}
+			}
+			else if (  (fpdat = fopen( av[i] , "r")) == NULL ) {
+				fatal("Cannot open format file:", av[i]);
+			}
+			process(fpfmt, fpdat, ent_delim, rec_delim);
+			ent_delim = rec_delim = '\0';
+		}
+	}
+	return 0;
+}
+
+/* ... EXCERPT FROM fl.h ... */
+
+#define ENTITY_DEL(x)
+#if ( x == '\0' )
+#define ENTITY_DELIM ';'
+#else
+#define ENTITY_DELIM ENTITY_DEL(x)
+#endif
+
+#define RECORD_DEL(y)
+#if ( y == '\0' )
+#define	RECORD_DELIM '\n'
+#else
+#define RECORD_DELIM RECORD_DEL(y)
+#endif
+
+
+/* ... EXCERPT FROM process.c ... */
+
+
+int process(FILE *fmt, FILE *data, char ent_delim, char rec_delim)
+{
+	symtab_t *tab;
+	
+	ENTITY_DEL('ent_delim');
+	RECORD_DEL('rec_delim');
+
+	if ( (tab = new_table()) == NULL )
+		fatal("Cannot create storage object","");
+
+	while ( get_record(tab,data) != NO )/* while more data	*/
+	{
+		//printf("Inside the process while loop\n");
+		mailmerge( tab, fmt );		/* merge with format	*/
+		clear_table(tab);		/* discard data		*/
+	}
+
+	//free_table(tab);			/* no memory leaks!	*/
+}
