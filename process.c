@@ -71,7 +71,8 @@ int get_record(symtab_t *tp, FILE *fp, char ent_delim, char rec_delim )
 			write_flag = WRITE_NONE;
 		}
 		/* Case 2 - at the end of writing the tag to the array, change flag to WRITE_VAL */
-		else if ( write_flag == WRITE_TAG && c == PAIR_DELIM ) {
+		//else if ( write_flag == WRITE_TAG && c == PAIR_DELIM ) {
+		else if ( write_flag == WRITE_TAG && prevchar == PAIR_DELIM ) {
 			write_flag = WRITE_VAL;
 		}
 		/* Case 3 at the end of writing the value to its array, change flag to WRITE_NONE */
@@ -80,11 +81,15 @@ int get_record(symtab_t *tp, FILE *fp, char ent_delim, char rec_delim )
 		}
 		/* Case 4 - at EOF, break out of this loop */
 		else if ( write_flag == WRITE_NONE && c == EOF ) {
-			printf("\nINSEIDE FLAG SETTER 2 FOR EOF, C = %c\n", c);
+			//printf("\nINSEIDE FLAG SETTER 2 FOR EOF, C = %c\n", c);
 			break;
 		}
 		/* Case 4 - call to error - WRITE_TAG does not see its proper closing delimiter (PAIR_DELIM) */
 		else if ( write_flag == WRITE_TAG && prevchar == ent_delim ) {
+				fatal("Badly formed data file", " ");		
+		}
+		/* Case 4a - WRITE_TAG is set, but more PAIR_DELIMS are seen before the ent_delim or rec_delim */
+		else if ( write_flag == WRITE_NONE && c == PAIR_DELIM ) {
 				fatal("Badly formed data file", " ");		
 		}
 		curr_vals = build_arrays(c, write_flag);
@@ -138,9 +143,9 @@ struct arr_builder build_arrays(char c, int write_flag) {
 	tag_arr[i] = '\0';
 	/* WRITE THE VALUE TO ITS ARRAY */
 	if ( write_flag == WRITE_VAL && j < MAXVAL ) {
-			if ( c != PAIR_DELIM ) {
+			//if ( c != PAIR_DELIM ) {
 				val_arr[j++] = c;
-			}	
+			//}	
 	}
 	val_arr[j] = '\0';
 	/* WRITE FORMAT TAG TO ITS ARRAY */
@@ -220,6 +225,7 @@ if ( write_flag == WRITE_NONE ) {
 	static int i = 0;
 	//struct arr_builder curr_fmt_vals;
 	//struct link curr_tab;
+	//show_table(tp);
 	if ( strcmp(firstword(tp),"complete") == 0 && table_len(tp) > 1) {
 			while( ( c = fgetc(fp)) != EOF ) {
 				/* write_flag set to WRITE_NONE

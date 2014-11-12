@@ -13,6 +13,8 @@ lastnamefirstnamemiddlenamelastnamelastnamelastnamelastname=Jenkins;firstname=Lo
 firstname=John
 name=Jane;    city=Boston;   ;;    college major=Chemistry
 abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz=Jane;      city=Bosotn;   ; ; ; ; college major=Chemistry=physics
+lastname=name=3;firstname=lastname=name
+title=;firstname=;lastname=;address=;city=
 name=Luke;lastnameTheCat;owner=mike
 =mike;lastname=TheCat;firstname=Luke
 name=Luke;=TheCat;owner=mike

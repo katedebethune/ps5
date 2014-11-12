@@ -19,6 +19,7 @@ int main(int ac, char *av[])
 	
 	myname = *av;
 	char ent_delim = ';', rec_delim = '\n';
+	int i = 0;
 
 	/*
 	 * 	check that there is at least one arg: the format file
@@ -46,7 +47,7 @@ int main(int ac, char *av[])
 	} 
 	/* ... otherwise, look for flags & file names ...*/
 	else {
-		for (int i = 2; i < ac; i++ ) {
+		for (i = 2; i < ac; i++ ) {
 			//printf("\n%s\n", av[i] );
 			if ( av[i][0] == '-' ) {
 				switch (av[i][1]) {
