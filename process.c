@@ -67,7 +67,7 @@ int get_record(symtab_t *tp, FILE *fp, char ent_delim, char rec_delim )
 			write_flag = WRITE_TAG;		
 		}
 		/* Case 2a, there is no value string, = and ; sit next to each other */
-		else if ( c == ent_delim && prevchar == PAIR_DELIM ) {
+		else if ( (c == ent_delim && prevchar == PAIR_DELIM) || (c == rec_delim && prevchar == PAIR_DELIM ) ) {
 			write_flag = WRITE_NONE;
 		}
 		/* Case 2 - at the end of writing the tag to the array, change flag to WRITE_VAL */
@@ -85,7 +85,7 @@ int get_record(symtab_t *tp, FILE *fp, char ent_delim, char rec_delim )
 			break;
 		}
 		/* Case 4 - call to error - WRITE_TAG does not see its proper closing delimiter (PAIR_DELIM) */
-		else if ( write_flag == WRITE_TAG && prevchar == ent_delim ) {
+		else if ( (write_flag == WRITE_TAG && prevchar == ent_delim) || (write_flag == WRITE_TAG && c == rec_delim) ) {
 				fatal("Badly formed data file", " ");		
 		}
 		/* Case 4a - WRITE_TAG is set, but more PAIR_DELIMS are seen before the ent_delim or rec_delim */
@@ -233,15 +233,21 @@ if ( write_flag == WRITE_NONE ) {
 				if ( c == FMT_DELIM && write_flag == WRITE_FMT_CLS ) {
 					write_flag = WRITE_FMT_OPN;
 				}
-				else if ( write_flag == WRITE_FMT_OPN ) {
+				else if ( write_flag == WRITE_FMT_OPN && c == '\n' ) {
+					fatal("Badly formed format file", " ");
+				}
+				else if ( c != '\n' ) {
 					//printf("\nInside WRITE_FMT\n");
+					//if ( c == '\n' ) {
+					//	fatal("Badly formed format file", " ");
+					//}	
 					if ( c != FMT_DELIM ) {
 						tag_arr[i++] = c;
 					}
 					else if ( i == 0 && c == FMT_DELIM ) {
 						putchar('%');
 						write_flag = WRITE_FMT_CLS;
-					}	
+					}
 					else if ( strlen(tag_arr) > 1 ) {
 						tag_arr[i] = '\0'; /* close tag string */
 						curr_tab = in_table(tp, tag_arr);
@@ -266,8 +272,10 @@ if ( write_flag == WRITE_NONE ) {
 						tag_arr[0] = un_tag_arr[0] = '\0';
 						i = 0;
 					}
-					
-				} 
+				}
+				else if ( c == '\n' ) {
+					fatal("Badly formed format file", " ");
+				}
 				else {
 					putchar(c);
 				}

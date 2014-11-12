@@ -224,10 +224,6 @@ delete( symtab_t *tp, char str[] )
 void
 clear_table(symtab_t *tp)
 {
-	/* under construction */
-	//printf("\nINSIDE clear_table\n");
-	//show_table(tp);
-	
 	struct link *linkp;
 	
 	while ( tp->head.next != NULL ) {
@@ -238,9 +234,6 @@ clear_table(symtab_t *tp)
 		free( linkp );
 	}
 	tp->head.next = NULL;
-	//print table for debugging purposes
-	//printf("\nINSIDE clear_table AFTER table has been cleared\n");
-	//show_table(tp);
 }
 	
 /*
