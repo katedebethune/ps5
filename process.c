@@ -233,10 +233,11 @@ if ( write_flag == WRITE_NONE ) {
 				if ( c == FMT_DELIM && write_flag == WRITE_FMT_CLS ) {
 					write_flag = WRITE_FMT_OPN;
 				}
-				else if ( write_flag == WRITE_FMT_OPN && c == '\n' ) {
-					fatal("Badly formed format file", " ");
-				}
-				else if ( c != '\n' ) {
+				//if ( write_flag == WRITE_FMT_OPN && c == DEFAULT_REC_DELIM ) {
+				//	fatal("Badly formed format file", " ");
+				//}
+				//else if ( c != '\n' ) {
+				else if ( write_flag == WRITE_FMT_OPN ) {
 					//printf("\nInside WRITE_FMT\n");
 					//if ( c == '\n' ) {
 					//	fatal("Badly formed format file", " ");
@@ -273,9 +274,9 @@ if ( write_flag == WRITE_NONE ) {
 						i = 0;
 					}
 				}
-				else if ( c == '\n' ) {
-					fatal("Badly formed format file", " ");
-				}
+				//else if ( c == DEFAULT_REC_DELIM ) {
+				//	fatal("Badly formed format file", " ");
+				//}
 				else {
 					putchar(c);
 				}

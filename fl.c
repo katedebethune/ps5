@@ -18,7 +18,7 @@ int main(int ac, char *av[])
 	FILE *fpdat;
 	
 	myname = *av;
-	char ent_delim = ';', rec_delim = '\n';
+	char ent_delim = ';', rec_delim = DEFAULT_REC_DELIM;
 	int i = 0;
 
 	/*
@@ -53,7 +53,7 @@ int main(int ac, char *av[])
 				switch (av[i][1]) {
 					case 'd': ent_delim=av[i][2];
 							  continue;
-					case 'D':  ent_delim='\n';
+					case 'D':  ent_delim=DEFAULT_REC_DELIM;
 							  continue;
 					case 'r': rec_delim=av[i][2];
 					           continue;	
@@ -64,7 +64,7 @@ int main(int ac, char *av[])
 				fatal("Cannot open format file:", av[i]);
 			}
 			process(fpfmt, fpdat, ent_delim, rec_delim);
-			ent_delim = ';', rec_delim = '\n';
+			ent_delim = ';', rec_delim = DEFAULT_REC_DELIM;
 		}
 	}
 	return 0;

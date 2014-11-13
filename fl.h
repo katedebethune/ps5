@@ -7,6 +7,7 @@
 #define	MAXVAL	120
 
 #define PAIR_DELIM '='
+#define DEFAULT_REC_DELIM '\n'
 #define	FMT_DELIM '%'
 #define UN_FMT_DELIM '!'
 #define WRITE_NONE 0
