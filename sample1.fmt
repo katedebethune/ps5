@@ -1,9 +1,20 @@
-                                            !date | awk '{print $2,$3,$6}'
-	Dear title lastname,%%
+                                            %!date | awk '{print $2,$3,$6}'%
+	Dear %first%,
 
-	You and everyone at address will be delighted to hear
+	You and the 5%% of  everyone at %address% will be delighted to hear
 	that you may already have won a major prize in the
-	CSCI sweepstakes.  Yes, %firstname%, you may be the
-	person in city to be the lucky winner of a new jet 
-	aircraft, ocean liner, or luxury vacation.  Read on..
+	CSCI sweepstakes.  Yes, %first%, you may be the
+	personi in %city% graduating in  %college major% to be the receiving
+	a message from %!hostname%. Oh, consider yourself to be SO lucky.
+	But, in case that weren't cause enough to celebrate consider that you
+	could also be the winner of a new jet aircraft, ocean liner,
+	or luxury vacation.  Read on..
 
+	_______
+	|     |
+	|     |
+        | @ @ |
+	|  |  |
+	| `-` |
+	|     |
+	-------

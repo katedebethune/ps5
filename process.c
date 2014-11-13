@@ -21,9 +21,6 @@ struct arr_builder build_arrays(char c, int write_flag);
 int process(FILE *fmt, FILE *data, char ent_delim, char rec_delim)
 {
 	symtab_t *tab;
-	
-	//ENTITY_DEL('ent_delim');
-	//RECORD_DEL('rec_delim');
 
 	if ( (tab = new_table()) == NULL )
 		fatal("Cannot create storage object","");
@@ -62,36 +59,47 @@ int get_record(symtab_t *tp, FILE *fp, char ent_delim, char rec_delim )
 
 	while( ( c = fgetc(fp) ) ) 
 	{
-		/* Case 1, no write_status */
-		if ( write_flag == WRITE_NONE && isalpha(c) ) {
-			write_flag = WRITE_TAG;		
+		if ( write_flag == WRITE_NONE ) { 
+			if ( isalpha(c) ) {
+				write_flag = WRITE_TAG; /* open WRITE_TAG */
+			}
+			if ( c == EOF ) { /* exit loop */
+				break;
+			}
+			if ( c == PAIR_DELIM ) {
+				fatal("Badly formed data file", " ");
+			}
+				
 		}
-		/* Case 2a, there is no value string, = and ; sit next to each other */
-		else if ( (c == ent_delim && prevchar == PAIR_DELIM) || (c == rec_delim && prevchar == PAIR_DELIM ) ) {
+		//else if ( prevchar == PAIR_DELIM && ( c == ent_delim || c == rec_delim ) ) { /* = and ; adjacent */
+		//	write_flag = WRITE_NONE;
+		//}
+		//else if ( write_flag == WRITE_TAG && prevchar == PAIR_DELIM ) { /* open WRITE_VAL */
+		//	write_flag = WRITE_VAL;
+		//}
+		else if ( prevchar == PAIR_DELIM ) {
+			if ( c == ent_delim || c == rec_delim ) {
+				write_flag = WRITE_NONE;
+			}
+			if ( write_flag == WRITE_TAG ) {
+				write_flag = WRITE_VAL;
+			}
+		}
+		else if ( write_flag == WRITE_VAL && ( c == ent_delim || c == rec_delim ) ) { /* reset to WRITE_NONE */
 			write_flag = WRITE_NONE;
-		}
-		/* Case 2 - at the end of writing the tag to the array, change flag to WRITE_VAL */
-		//else if ( write_flag == WRITE_TAG && c == PAIR_DELIM ) {
-		else if ( write_flag == WRITE_TAG && prevchar == PAIR_DELIM ) {
-			write_flag = WRITE_VAL;
-		}
-		/* Case 3 at the end of writing the value to its array, change flag to WRITE_NONE */
-		else if ( (write_flag == WRITE_VAL && c == ent_delim) || (write_flag == WRITE_VAL && c == rec_delim) ) {
-			write_flag = WRITE_NONE;
-		}
-		/* Case 4 - at EOF, break out of this loop */
-		else if ( write_flag == WRITE_NONE && c == EOF ) {
-			//printf("\nINSEIDE FLAG SETTER 2 FOR EOF, C = %c\n", c);
-			break;
 		}
 		/* Case 4 - call to error - WRITE_TAG does not see its proper closing delimiter (PAIR_DELIM) */
-		else if ( (write_flag == WRITE_TAG && prevchar == ent_delim) || (write_flag == WRITE_TAG && c == rec_delim) ) {
+		//else if ( (write_flag == WRITE_TAG && prevchar == ent_delim) || (write_flag == WRITE_TAG && c == rec_delim) ) {
+		//		fatal("Badly formed data file", " ");		
+		//}
+		else if ( write_flag == WRITE_TAG && ( prevchar == ent_delim ||  c == rec_delim) ) {
 				fatal("Badly formed data file", " ");		
 		}
+		
 		/* Case 4a - WRITE_TAG is set, but more PAIR_DELIMS are seen before the ent_delim or rec_delim */
-		else if ( write_flag == WRITE_NONE && c == PAIR_DELIM ) {
-				fatal("Badly formed data file", " ");		
-		}
+		//else if ( write_flag == WRITE_NONE && c == PAIR_DELIM ) {
+		//		fatal("Badly formed data file", " ");		
+		//}
 		curr_vals = build_arrays(c, write_flag);
 		//return build_list(curr_vals, write_flag, c, prevchar); 
 		if ( write_flag == WRITE_NONE ) {
@@ -128,44 +136,28 @@ int get_record(symtab_t *tp, FILE *fp, char ent_delim, char rec_delim )
  *	history: 2014-11-08 version 1
  **/
 struct arr_builder build_arrays(char c, int write_flag) {
-//int build_arrays (char c, int write_flag) {
 	
 	static int i = 0, j = 0;
 	static char tag_arr[MAXFLD + 1] = "\0", val_arr[MAXVAL + 1] = "\0";
 	struct arr_builder ab;
 	
-	/* WRITE THE TAG TO ITS ARRAY */
-	if ( write_flag == WRITE_TAG && i < MAXFLD ) {
+	if ( write_flag == WRITE_TAG && i < MAXFLD ) { /* ... write tag to array ... */
 			if ( c != PAIR_DELIM ) {
 				tag_arr[i++] = c;
 			}
 	}
 	tag_arr[i] = '\0';
-	/* WRITE THE VALUE TO ITS ARRAY */
-	if ( write_flag == WRITE_VAL && j < MAXVAL ) {
-			//if ( c != PAIR_DELIM ) {
+	if ( write_flag == WRITE_VAL && j < MAXVAL ) { /* ... write val to array ... */
 				val_arr[j++] = c;
-			//}	
 	}
 	val_arr[j] = '\0';
-	/* WRITE FORMAT TAG TO ITS ARRAY */
-	if ( write_flag == WRITE_FMT_OPN && i < MAXFLD ) {
-		if ( c != FMT_DELIM ) {
-			tag_arr[i++] = c;
-		}
-	}
-	tag_arr[i] = '\0';
-	/* COPY ARRAYS TO STRUCT */	
-	if ( write_flag == WRITE_NONE ) {
-			strcpy(ab.tag, tag_arr);
-			strcpy(ab.val, val_arr);
-			i = 0; j = 0;
-			tag_arr[i] = '\0';
-			val_arr[j] = '\0';
+	if ( write_flag == WRITE_NONE ) { /* ... copy arrays ... */	
+			strcpy(ab.tag, tag_arr); strcpy(ab.val, val_arr);
+			i = j = 0;
+			tag_arr[i] = val_arr[j] = '\0';
 			return ab;
 	}
-	strcpy(ab.tag, "\0");
-	strcpy(ab.val, "\0");
+	strcpy(ab.tag, "\0"); strcpy(ab.val, "\0"); /* ... reset struct ... */
 	return ab;
 }
 /* END build_arrays */
@@ -236,13 +228,13 @@ if ( write_flag == WRITE_NONE ) {
 					if ( c != FMT_DELIM ) {
 						tag_arr[i++] = c;
 					}
-					else if ( i == 0 ) { /* ... an escaped percent sign, output % to stdout ... */
-						putchar('%');
+					else if ( i == 0 ) { /* ... an escaped % sign, output % to stdout ... */
+						putchar(c);
 						write_flag = WRITE_FMT_CLS;
 					}
 					else if ( strlen(tag_arr) > 1 ) {
 						tag_arr[i] = '\0'; /* close tag string */
-						if ( (in_table(tp, tag_arr) ) ) { /* tag_arr in table */
+						if ( (in_table(tp, tag_arr) ) ) { /* check if tag_arr in table */
 							printf("%s", (lookup(tp, tag_arr)));
 						} 
 						else if ( tag_arr[0] == UN_FMT_DELIM ) { /* tag_arr a system var? */

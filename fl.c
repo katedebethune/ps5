@@ -70,17 +70,6 @@ int main(int ac, char *av[])
 					fatal("badly formed command line flag", " ");
 				}
 			}
-			/* if ( av[i][0] == '-' ) {
-				switch (av[i][1]) {
-					case 'd': ent_delim=av[i][2];
-							  continue;
-					case 'D':  ent_delim=DEFAULT_REC_DELIM;
-							  continue;
-					case 'r': rec_delim=av[i][2];
-					           continue;	
-					default:  fatal("badly formed command line flag", " ");
-				}
-			} */
 			else if (  (fpdat = fopen( av[i] , "r")) == NULL ) {
 				fatal("Cannot open format file:", av[i]);
 			}
