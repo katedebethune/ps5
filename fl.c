@@ -1,5 +1,6 @@
 #include	<stdio.h>
 #include	<stdlib.h>
+#include	<string.h>
 #include	"fl.h"
 
 /*
@@ -50,6 +51,25 @@ int main(int ac, char *av[])
 		for (i = 2; i < ac; i++ ) {
 			//printf("\n%s\n", av[i] );
 			if ( av[i][0] == '-' ) {
+				if ( strlen(av[i]) == 2 && av[i][1] == 'D' ) {
+					ent_delim=DEFAULT_REC_DELIM;
+					continue;
+				}
+				else if ( strlen(av[i]) == 3 ) {
+					if ( av[i][1] == 'd' ) {
+						ent_delim=av[i][2];
+						continue;
+					}
+					if ( av[i][1] == 'r' ) {
+						rec_delim=av[i][2];
+						continue;
+					}
+				}
+				else {
+					fatal("badly formed command line flag", " ");
+				}
+			}
+			/* if ( av[i][0] == '-' ) {
 				switch (av[i][1]) {
 					case 'd': ent_delim=av[i][2];
 							  continue;
@@ -59,7 +79,7 @@ int main(int ac, char *av[])
 					           continue;	
 					default:  fatal("badly formed command line flag", " ");
 				}
-			}
+			} */
 			else if (  (fpdat = fopen( av[i] , "r")) == NULL ) {
 				fatal("Cannot open format file:", av[i]);
 			}
