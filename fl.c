@@ -52,6 +52,7 @@ int main(int ac, char *av[])
 			//printf("\n%s\n", av[i] );
 			if ( av[i][0] == '-' ) {
 				if ( strlen(av[i]) == 2 && av[i][1] == 'D' ) {
+					printf("\nInside -D setter\n");
 					ent_delim=DEFAULT_REC_DELIM;
 					continue;
 				}

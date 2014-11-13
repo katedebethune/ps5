@@ -230,6 +230,9 @@ if ( write_flag == WRITE_NONE ) {
 					write_flag = WRITE_FMT_OPN;
 				}
 				else if ( write_flag == WRITE_FMT_OPN ) {
+					if ( c == DEFAULT_REC_DELIM ) {
+						fatal("Badly formed format file", " ");
+					}
 					if ( c != FMT_DELIM ) {
 						tag_arr[i++] = c;
 					}
