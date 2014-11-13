@@ -220,58 +220,45 @@ if ( write_flag == WRITE_NONE ) {
  
  void	mailmerge( symtab_t *tp, FILE *fp) {
 	
-	//int c, curr_tab, write_flag = WRITE_FMT_CLS;
 	int c, write_flag = WRITE_FMT_CLS;
 	static char tag_arr[MAXFLD + 1] = "\0", un_tag_arr[MAXFLD + 1] = "\0";
 	static int i = 0;
-	//struct arr_builder curr_fmt_vals;
-	//struct link curr_tab;
-	//show_table(tp);
+	
 	if ( strcmp(firstword(tp),"complete") == 0 && table_len(tp) > 1) {
 			while( ( c = fgetc(fp)) != EOF ) {
-				/* write_flag set to WRITE_NONE and a % is encountered, set write_flag to WRITE_FMT_OPN */
-				if ( c == FMT_DELIM && write_flag == WRITE_FMT_CLS ) {
+				if ( c == FMT_DELIM && write_flag == WRITE_FMT_CLS ) { /* % is encountered */
 					write_flag = WRITE_FMT_OPN;
 				}
 				else if ( write_flag == WRITE_FMT_OPN ) {
 					if ( c != FMT_DELIM ) {
 						tag_arr[i++] = c;
 					}
-					//else if ( i == 0 && c == FMT_DELIM ) {
-					/* ... this is an escaped percent sign, output % to stdout ... */
-					else if ( i == 0 ) {
+					else if ( i == 0 ) { /* ... an escaped percent sign, output % to stdout ... */
 						putchar('%');
 						write_flag = WRITE_FMT_CLS;
 					}
 					else if ( strlen(tag_arr) > 1 ) {
 						tag_arr[i] = '\0'; /* close tag string */
-						//curr_tab = in_table(tp, tag_arr);
-						/* ... current tag_arr is in the table, print its value to stdout ... */
-						//if ( curr_tab ) {
-						if ( (in_table(tp, tag_arr) ) ){
+						if ( (in_table(tp, tag_arr) ) ) { /* tag_arr in table */
 							printf("%s", (lookup(tp, tag_arr)));
 						} 
-						/* ... tag_arr not in sym_tab, check to see if it is a system tag ... */
-						else if ( tag_arr[0] == UN_FMT_DELIM ) {
+						else if ( tag_arr[0] == UN_FMT_DELIM ) { /* tag_arr a system var? */
 							strcpy(un_tag_arr, tag_arr+1);
 							fflush(stdout);
 							table_export(tp);
 							system(un_tag_arr);
 						} 
-						/* ... reset tag_arr, i, set write_flg to WRITE_FMT_CLS ... */
-						tag_arr[0] = un_tag_arr[0] = '\0';
+						tag_arr[0] = un_tag_arr[0] = '\0'; /* resets for next iter */
 						i = 0;
 						write_flag = WRITE_FMT_CLS;
 					}
+
 				}
 				else {
 					putchar(c);
 				}
 			}
 			fseek(fp, 0L, 0);
-	}
-	else {
-			exit(1);
 	}
 }
 
