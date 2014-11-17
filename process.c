@@ -232,6 +232,7 @@ struct arr_builder build_arrays(char c, int write_flag) {
 						//else if ( tag_arr[0] == UN_FMT_DELIM ) { /* tag_arr a system var? */
 						else if ( curr_fmt_tag.tag[0] == UN_FMT_DELIM ) { /* tag_arr a system var? */
 							strcpy(un_tag_arr, tag_arr+1);
+							strcpy(un_tag_arr, curr_fmt_tag.tag+1);
 							fflush(stdout);
 							table_export(tp);
 							system(un_tag_arr);
