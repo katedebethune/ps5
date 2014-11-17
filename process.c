@@ -5,6 +5,7 @@
 #include	"fl.h"
 #include	"ws13.h"
 
+int set_write_flag(int c, int prevchar, int write_flag, char ent_delim, char rec_delim);
 struct arr_builder build_arrays(char c, int write_flag);
 //int build_list(struct arr_builder curr_vals, int write_flag, char c, char prevchar) 
 
@@ -59,33 +60,36 @@ int get_record(symtab_t *tp, FILE *fp, char ent_delim, char rec_delim )
 
 	while( ( c = fgetc(fp) ) ) 
 	{
-		if ( write_flag == WRITE_NONE ) { 
-			if ( isalpha(c) ) {
-				write_flag = WRITE_TAG; /* open WRITE_TAG */
-			}
-			if ( c == PAIR_DELIM ) { /* no fieldname */
-				fatal("Badly formed data file", " ");
-			}
-			if ( c == EOF ) { /* exit loop */
-				break;
-			}
-				
+		if ( write_flag == WRITE_NONE && c == EOF ) {
+			break;
 		}
-		else if ( prevchar == PAIR_DELIM ) {
-			if ( c == ent_delim || c == rec_delim ) { /* = & ; are adjacent, check this*/
-				write_flag = WRITE_NONE;
-			}
-			if ( write_flag == WRITE_TAG ) { /* open WRITE_VAL */
-				write_flag = WRITE_VAL;
-			}
-		}
-		else if ( write_flag == WRITE_VAL && ( c == ent_delim || c == rec_delim ) ) { /* reset to WRITE_NONE */
-			write_flag = WRITE_NONE;
-		}
-		else if ( write_flag == WRITE_TAG && 
-			( prevchar == ent_delim ||  c == rec_delim) ) { /* field missing = */
-				fatal("Badly formed data file", " ");		
-		}
+		write_flag = set_write_flag(c, prevchar, write_flag, ent_delim, rec_delim);
+	//	if ( write_flag == WRITE_NONE ) { 
+	//		if ( isalpha(c) ) {
+	//			write_flag = WRITE_TAG; /* open WRITE_TAG */
+	//		}
+	//		if ( c == PAIR_DELIM ) { /* no fieldname */
+	//			fatal("Badly formed data file", " ");
+	//		}
+	//		if ( c == EOF ) { /* exit loop */
+	//			break;
+	//		}			
+	//	}
+	//	else if ( prevchar == PAIR_DELIM ) {
+	//		if ( c == ent_delim || c == rec_delim ) { /* = & ; are adjacent, check this*/
+	//			write_flag = WRITE_NONE;
+	//		}
+	//		if ( write_flag == WRITE_TAG ) { /* open WRITE_VAL */
+	//			write_flag = WRITE_VAL;
+	//		}
+	//	}
+	//	else if ( write_flag == WRITE_VAL && ( c == ent_delim || c == rec_delim ) ) { /* reset to WRITE_NONE */
+	//		write_flag = WRITE_NONE;
+	//	}
+	//	else if ( write_flag == WRITE_TAG && 
+	//		( prevchar == ent_delim ||  c == rec_delim) ) { /* field missing = */
+	//			fatal("Badly formed data file", " ");		
+	//	}
 		curr_vals = build_arrays(c, write_flag);
 		if ( write_flag == WRITE_NONE ) {
 			if ( strcmp(curr_vals.tag, "\0") != 0 ) {
@@ -108,7 +112,55 @@ int get_record(symtab_t *tp, FILE *fp, char ent_delim, char rec_delim )
 }
 /* END get_record */
 
+
+
 /**
+ *	set_write_flag(int c, int prevchar, int write_flag, char ent_delim, char rec_delim)
+ *
+ *	Purpose: helper method for get_record, uses the current c, prevchar
+ *			 current write_flag setting, ent_delim, &  rec_delim to determine
+ *    		 current write_flag
+ *	Input:   int c  - the current char
+ *		 	 int prevchar - the previous char in the stream
+ *			 int write_flag	- the current write process
+ *	 		 char ent_delim - the current entity delimiter (key:value pair delim)
+ *			 char rec_delim - the current record delimiter
+ *	Output:  returns updated write_flag value to get_record()
+ *	
+ *	Errors:  not reported.
+ *	history: 2014-11-17 version 1
+ **/
+ int set_write_flag(int c, int prevchar, int write_flag, char ent_delim, char rec_delim) {
+ 	if ( write_flag == WRITE_NONE ) { 
+			if ( isalpha(c) ) {
+				write_flag = WRITE_TAG; /* open WRITE_TAG */
+			}
+			if ( c == PAIR_DELIM ) { /* no fieldname */
+				fatal("Badly formed data file", " ");
+			}
+			//if ( c == EOF ) { /* exit loop */
+			//	break;
+			//}
+				
+		}
+		else if ( prevchar == PAIR_DELIM ) {
+			if ( c == ent_delim || c == rec_delim ) { /* = & ; are adjacent, check this*/
+				write_flag = WRITE_NONE;
+			}
+			if ( write_flag == WRITE_TAG ) { /* open WRITE_VAL */
+				write_flag = WRITE_VAL;
+			}
+		}
+		else if ( write_flag == WRITE_VAL && ( c == ent_delim || c == rec_delim ) ) { /* reset to WRITE_NONE */
+			write_flag = WRITE_NONE;
+		}
+		else if ( write_flag == WRITE_TAG && 
+			( prevchar == ent_delim ||  c == rec_delim) ) { /* field missing = */
+				fatal("Badly formed data file", " ");		
+		}
+		return write_flag;
+}
+ /**
  *	build_arrays(char c, int write_flag)
  *
  *	Purpose: helper method for get_record, uses the current c
