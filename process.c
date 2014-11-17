@@ -171,8 +171,9 @@ struct arr_builder build_arrays(char c, int write_flag) {
 		if ( c != FMT_DELIM ) {
 			tag_arr[i++] = c;
 		}
+		tag_arr[i] = '\0';
 	}
-	tag_arr[i] = '\0';
+	
 	
 	/* COPY ARRAYS TO STRUCT */	
 	if ( write_flag == WRITE_NONE ) {
