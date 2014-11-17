@@ -153,6 +153,7 @@ struct arr_builder build_arrays(char c, int write_flag) {
 	
 	/* WRITE THE TAG TO ITS ARRAY */
 	if ( write_flag == WRITE_TAG && i < MAXFLD ) {
+	//if ( ( write_flag == WRITE_TAG || write_flag == FMT_TAG_OPN ) && i < MAXFLD ) {
 			if ( c != PAIR_DELIM ) {
 				tag_arr[i++] = c;
 			}
@@ -166,12 +167,12 @@ struct arr_builder build_arrays(char c, int write_flag) {
 	val_arr[j] = '\0';
 	
 	/* WRITE FORMAT TAG TO ITS ARRAY */
-	//if ( write_flag == WRITE_FMT_OPN && i < MAXFLD ) {
-	//	if ( c != FMT_DELIM ) {
-	//		tag_arr[i++] = c;
-	//	}
-	//}
-	//tag_arr[i] = '\0';
+	if ( write_flag == WRITE_FMT_OPN && i < MAXFLD ) {
+		if ( c != FMT_DELIM ) {
+			tag_arr[i++] = c;
+		}
+	}
+	tag_arr[i] = '\0';
 	
 	/* COPY ARRAYS TO STRUCT */	
 	if ( write_flag == WRITE_NONE ) {
@@ -204,29 +205,32 @@ struct arr_builder build_arrays(char c, int write_flag) {
 	int c, write_flag = WRITE_FMT_CLS;
 	static char tag_arr[MAXFLD + 1] = "\0", un_tag_arr[MAXFLD + 1] = "\0";
 	static int i = 0;
+	struct arr_builder curr_fmt_tag;
 	
 	if ( strcmp(firstword(tp), SYM_TAB_END_OF_RECORD) == 0 && table_len(tp) > 1) {
 			while( ( c = fgetc(fp)) != EOF ) {
-				if ( c == FMT_DELIM && write_flag == WRITE_FMT_CLS ) { /* % is encountered */
+				if ( c == FMT_DELIM && write_flag == WRITE_FMT_CLS ) { /* opening % is encountered */
 					write_flag = WRITE_FMT_OPN;
 				}
 				else if ( write_flag == WRITE_FMT_OPN ) {
 					if ( c == DEFAULT_REC_DELIM ) {
 						fatal("Badly formed format file, no closing format tag before end of record", " ");
 					}
-					if ( c != FMT_DELIM ) {
-						tag_arr[i++] = c;
+					if ( c != FMT_DELIM ) { /* ... build up fmt tag array ... */
+						//tag_arr[i++] = c;
+						curr_fmt_tag = build_arrays(c, write_flag);
 					}
 					else if ( i == 0 ) { /* ... an escaped percent sign, output % to stdout ... */
 						putchar('%');
 						write_flag = WRITE_FMT_CLS;
 					}
 					else if ( strlen(tag_arr) > 1 ) {
-						tag_arr[i] = '\0'; /* close tag string */
-						if ( (in_table(tp, tag_arr) ) ) { /* tag_arr in table */
-							printf("%s", (lookup(tp, tag_arr)));
+						//tag_arr[i] = '\0'; /* close tag string */
+						if ( (in_table(tp, curr_fmt_tag.tag) ) ) { /* tag_arr in table */
+							printf("%s", (lookup(tp, curr_fmt_tag.tag)));
 						} 
-						else if ( tag_arr[0] == UN_FMT_DELIM ) { /* tag_arr a system var? */
+						//else if ( tag_arr[0] == UN_FMT_DELIM ) { /* tag_arr a system var? */
+						else if ( curr_fmt_tag.tag[0] == UN_FMT_DELIM ) { /* tag_arr a system var? */
 							strcpy(un_tag_arr, tag_arr+1);
 							fflush(stdout);
 							table_export(tp);
