@@ -100,7 +100,7 @@ int get_record(symtab_t *tp, FILE *fp, char ent_delim, char rec_delim )
  *	history: 2014-11-17 version 1
  **/
  int set_write_flag(int c, int prevchar, int write_flag, char ent_delim, char rec_delim) {
- 		/* Case 1, no write_status, this setting triggers addition to symtab in get_record */
+ 		/* Case 1, no write_status, triggers addition to symtab in get_record */
 		if ( write_flag == WRITE_NONE && isalpha(c) ) {
 			write_flag = WRITE_TAG;		
 		}
@@ -117,7 +117,7 @@ int get_record(symtab_t *tp, FILE *fp, char ent_delim, char rec_delim )
 			write_flag = WRITE_NONE;
 		}
 		/* Case 4 - call to error - WRITE_TAG does not see its proper closing delimiter (PAIR_DELIM) */
-		/* in English: the WRITE_TAG value does not include an = sign */
+		/* in English: the WRITE_TAG value does not include '=' */
 		else if ( (write_flag == WRITE_TAG && prevchar == ent_delim) || (write_flag == WRITE_TAG && c == rec_delim) ) {
 				fatal("Badly formed data file, no '=' found to close tag", " ");		
 		}
@@ -157,9 +157,7 @@ struct arr_builder build_arrays(char c, int write_flag) {
 	tag_arr[i] = '\0';
 	/* WRITE THE VALUE TO ITS ARRAY */
 	if ( write_flag == WRITE_VAL && j < MAXVAL ) {
-			//if ( c != PAIR_DELIM ) {
 				val_arr[j++] = c;
-			//}	
 	}
 	val_arr[j] = '\0';
 	/* WRITE FORMAT TAG TO ITS ARRAY */
