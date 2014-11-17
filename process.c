@@ -174,9 +174,8 @@ struct arr_builder build_arrays(char c, int write_flag) {
 		tag_arr[i] = '\0';
 	}
 	
-	
 	/* COPY ARRAYS TO STRUCT */	
-	if ( write_flag == WRITE_NONE ) {
+	if ( write_flag == WRITE_NONE || ( write_flag == WRITE_FMT_OPN && c == FMT_DELIM ) ) {
 			strcpy(ab.tag, tag_arr);
 			strcpy(ab.val, val_arr);
 			i = 0; j = 0;
@@ -225,14 +224,14 @@ struct arr_builder build_arrays(char c, int write_flag) {
 						putchar('%');
 						write_flag = WRITE_FMT_CLS;
 					}
-					else if ( strlen(tag_arr) > 1 ) {
+					else if ( strlen(curr_fmt_tag.tag) > 1 ) {
 						//tag_arr[i] = '\0'; /* close tag string */
 						if ( (in_table(tp, curr_fmt_tag.tag) ) ) { /* tag_arr in table */
 							printf("%s", (lookup(tp, curr_fmt_tag.tag)));
 						} 
 						//else if ( tag_arr[0] == UN_FMT_DELIM ) { /* tag_arr a system var? */
 						else if ( curr_fmt_tag.tag[0] == UN_FMT_DELIM ) { /* tag_arr a system var? */
-							strcpy(un_tag_arr, tag_arr+1);
+							//strcpy(un_tag_arr, tag_arr+1);
 							strcpy(un_tag_arr, curr_fmt_tag.tag+1);
 							fflush(stdout);
 							table_export(tp);
