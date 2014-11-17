@@ -105,7 +105,8 @@ int get_record(symtab_t *tp, FILE *fp, char ent_delim, char rec_delim )
 			write_flag = WRITE_TAG;		
 		}
 		/* Case 2a, there is no value string: '=' and ';' sit next to each other */
-		else if ( (c == ent_delim && prevchar == PAIR_DELIM) || (c == rec_delim && prevchar == PAIR_DELIM ) ) {
+		else if ( (c == ent_delim && prevchar == PAIR_DELIM) 
+			|| (c == rec_delim && prevchar == PAIR_DELIM ) ) {
 			write_flag = WRITE_NONE;
 		}
 		/* Case 2 - at the end of writing the tag to the array, change flag to WRITE_VAL */
@@ -118,7 +119,8 @@ int get_record(symtab_t *tp, FILE *fp, char ent_delim, char rec_delim )
 		}
 		/* Case 4 - call to error - WRITE_TAG does not see its proper closing delimiter (PAIR_DELIM) */
 		/* in English: the WRITE_TAG value does not include '=' */
-		else if ( (write_flag == WRITE_TAG && prevchar == ent_delim) || (write_flag == WRITE_TAG && c == rec_delim) ) {
+		else if ( (write_flag == WRITE_TAG && prevchar == ent_delim) 
+			|| (write_flag == WRITE_TAG && c == rec_delim) ) {
 				fatal("Badly formed data file, no '=' found to close tag", " ");		
 		}
 		/* Case 4a - WRITE_TAG is set, but more PAIR_DELIMS are seen before the ent_delim or rec_delim */
@@ -142,8 +144,7 @@ int get_record(symtab_t *tp, FILE *fp, char ent_delim, char rec_delim )
  *	history: 2014-11-08 version 1
  **/
 struct arr_builder build_arrays(char c, int write_flag) {
-//int build_arrays (char c, int write_flag) {
-	
+
 	static int i = 0, j = 0;
 	static char tag_arr[MAXFLD + 1] = "\0", val_arr[MAXVAL + 1] = "\0";
 	struct arr_builder ab;
@@ -155,29 +156,30 @@ struct arr_builder build_arrays(char c, int write_flag) {
 			}
 	}
 	tag_arr[i] = '\0';
+	
 	/* WRITE THE VALUE TO ITS ARRAY */
 	if ( write_flag == WRITE_VAL && j < MAXVAL ) {
 				val_arr[j++] = c;
 	}
 	val_arr[j] = '\0';
+	
 	/* WRITE FORMAT TAG TO ITS ARRAY */
-	if ( write_flag == WRITE_FMT_OPN && i < MAXFLD ) {
-		if ( c != FMT_DELIM ) {
-			tag_arr[i++] = c;
-		}
-	}
-	tag_arr[i] = '\0';
+	//if ( write_flag == WRITE_FMT_OPN && i < MAXFLD ) {
+	//	if ( c != FMT_DELIM ) {
+	//		tag_arr[i++] = c;
+	//	}
+	//}
+	//tag_arr[i] = '\0';
+	
 	/* COPY ARRAYS TO STRUCT */	
 	if ( write_flag == WRITE_NONE ) {
 			strcpy(ab.tag, tag_arr);
 			strcpy(ab.val, val_arr);
 			i = 0; j = 0;
-			tag_arr[i] = '\0';
-			val_arr[j] = '\0';
+			tag_arr[i] = val_arr[j] = '\0';
 			return ab;
 	}
-	strcpy(ab.tag, "\0");
-	strcpy(ab.val, "\0");
+	strcpy(ab.tag, "\0"); strcpy(ab.val, "\0");
 	return ab;
 }
 /* END build_arrays */
