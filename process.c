@@ -210,9 +210,10 @@ struct arr_builder build_arrays(char c, int write_flag) {
 				if ( c == FMT_DELIM && write_flag == WRITE_FMT_CLS ) { /* % is encountered */
 					write_flag = WRITE_FMT_OPN;
 				}
-				else if ( write_flag == WRITE_FMT_OPN ) {
+				//else if ( write_flag == WRITE_FMT_OPN ) {
+				else {
 					if ( c == DEFAULT_REC_DELIM ) {
-						fatal("Badly formed format file", " ");
+						fatal("Badly formed format file, no closing format tag before end of record", " ");
 					}
 					if ( c != FMT_DELIM ) {
 						tag_arr[i++] = c;
@@ -236,11 +237,11 @@ struct arr_builder build_arrays(char c, int write_flag) {
 						i = 0;
 						write_flag = WRITE_FMT_CLS;
 					}
-
+				putchar(c);
 				}
-				else {
-					putchar(c);
-				}
+				//else {
+				//	putchar(c);
+				//}
 			}
 			fseek(fp, 0L, 0);
 	}
