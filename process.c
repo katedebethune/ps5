@@ -33,6 +33,7 @@ int process(FILE *fmt, FILE *data, char ent_delim, char rec_delim)
 	free_table(tab); 			/* no memory leaks!	*/
 	return(0);			
 }
+/* END process() */
 
 /**
  *	get_record(symtab_t *tp, FILE *fp)
@@ -69,12 +70,12 @@ int get_record(symtab_t *tp, FILE *fp, char ent_delim, char rec_delim )
 			}
 			if ( c == EOF ) {
 				if ( prevchar != rec_delim ) {
-					insert( tp, "complete", "complete");
+					insert( tp, SYM_TAB_END_OF_RECORD, SYM_TAB_END_OF_RECORD);
 				}
 				return NO;
 			}
 			else if ( c == rec_delim ) {
-				insert( tp, "complete", "complete");
+				insert( tp, SYM_TAB_END_OF_RECORD, SYM_TAB_END_OF_RECORD);
 				return YES;
 			}
 		} 
@@ -82,7 +83,7 @@ int get_record(symtab_t *tp, FILE *fp, char ent_delim, char rec_delim )
 	}
 	return NO;
 }
-/* END get_record */
+/* END get_record() */
 
 /**
  *	set_write_flag(int c, int prevchar, int write_flag, char ent_delim, char rec_delim)
@@ -130,6 +131,7 @@ int get_record(symtab_t *tp, FILE *fp, char ent_delim, char rec_delim )
 		}
 		return write_flag;
  }
+ /* END set_write_flag() */
 
 /**
  *	build_arrays(char c, int write_flag)
@@ -185,40 +187,6 @@ struct arr_builder build_arrays(char c, int write_flag) {
 /* END build_arrays */
 
 /**
- *	build_list(struct arr_builder curr_vals, int write_flag, char c, char prevchar)
- *  FIX EXPLANATIONS
- *	Purpose: helper method for get_record, uses the current c
- *			 and write_status flag to build up arrays for storage in symtab.
- *	Input:   char c  - the current char
- *		 	 int write_flag	-the current write process
- *	Output:  stores tag and value arrays in a struct, returns this 
- *			 to get_record() for further processing.
- *	Errors:  not reported.
- *	history: 2014-11-12 version 1
- **/
-
-/* build_list(struct arr_builder curr_vals, int write_flag, char c, char prevchar) {
-if ( write_flag == WRITE_NONE ) {
-		if ( strcmp(curr_vals.tag, "\0") != 0 ) {
-			insert( tp, curr_vals.tag, curr_vals.val );
-		}
-		if ( c == EOF ) {
-			if ( prevchar != RECORD_DELIM ) {
-				insert( tp, "complete", "complete");
-			}
-			printf("\nInside EOF && c == RECORD_DELIM, set stop flag loop\n");
-			return NO;
-		}
-		else if ( c == RECORD_DELIM ) {
-			insert( tp, "complete", "complete");
-			//printf("\nInside RECORD_DELIM loop\n");
-			//printf ("c = %c; prevchar = %c\n", c, prevchar);
-			return YES;
-		}
-	}
-} */
-
-/**
  *	mail_merge (char c, int write_flag)
  *
  *	Purpose: helper method for get_record, uses the current c
@@ -237,7 +205,7 @@ if ( write_flag == WRITE_NONE ) {
 	static char tag_arr[MAXFLD + 1] = "\0", un_tag_arr[MAXFLD + 1] = "\0";
 	static int i = 0;
 	
-	if ( strcmp(firstword(tp),"complete") == 0 && table_len(tp) > 1) {
+	if ( strcmp(firstword(tp), SYM_TAB_END_OF_RECORD) == 0 && table_len(tp) > 1) {
 			while( ( c = fgetc(fp)) != EOF ) {
 				if ( c == FMT_DELIM && write_flag == WRITE_FMT_CLS ) { /* % is encountered */
 					write_flag = WRITE_FMT_OPN;
@@ -277,3 +245,4 @@ if ( write_flag == WRITE_NONE ) {
 			fseek(fp, 0L, 0);
 	}
 }
+/* END mail_merge */

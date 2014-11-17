@@ -10,6 +10,7 @@
 #define DEFAULT_REC_DELIM '\n'
 #define	FMT_DELIM '%'
 #define UN_FMT_DELIM '!'
+#define SYM_TAB_END_OF_RECORD "complete"
 #define WRITE_NONE 0
 #define WRITE_TAG 1
 #define WRITE_VAL 2
