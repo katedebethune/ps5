@@ -5,8 +5,10 @@
 #include	"fl.h"
 #include	"ws13.h"
 
-struct arr_builder build_arrays(char c, int write_flag);
+struct arr_builder build_table(char c, int write_flag);
 int set_write_flag(int c, int prevchar, int write_flag, char ent_delim, char rec_delim);
+//struct arr_builder build_fmt_tag(char c, int write_flag);
+int write_fmt_tag(int c, int write_flag, symtab_t *tp);
 
 /**
  *	process(fmt, data)
@@ -63,7 +65,7 @@ int get_record(symtab_t *tp, FILE *fp, char ent_delim, char rec_delim )
 			break;
 		}
 		write_flag = set_write_flag(c, prevchar, write_flag, ent_delim, rec_delim);
-		curr_vals = build_arrays(c, write_flag);
+		curr_vals = build_table(c, write_flag);
 		if ( write_flag == WRITE_NONE ) {
 			if ( strcmp(curr_vals.tag, "\0") != 0 ) {
 				insert( tp, curr_vals.tag, curr_vals.val );
@@ -134,7 +136,7 @@ int get_record(symtab_t *tp, FILE *fp, char ent_delim, char rec_delim )
  /* END set_write_flag() */
 
 /**
- *	build_arrays(char c, int write_flag)
+ *	build_table(char c, int write_flag)
  *
  *	Purpose: helper method for get_record, uses the current c
  *			 and write_status flag to build up arrays for storage in symtab.
@@ -145,7 +147,7 @@ int get_record(symtab_t *tp, FILE *fp, char ent_delim, char rec_delim )
  *	Errors:  not reported.
  *	history: 2014-11-08 version 1
  **/
-struct arr_builder build_arrays(char c, int write_flag) {
+struct arr_builder build_table(char c, int write_flag) {
 
 	static int i = 0, j = 0;
 	static char tag_arr[MAXFLD + 1] = "\0", val_arr[MAXVAL + 1] = "\0";
@@ -153,7 +155,6 @@ struct arr_builder build_arrays(char c, int write_flag) {
 	
 	/* WRITE THE TAG TO ITS ARRAY */
 	if ( write_flag == WRITE_TAG && i < MAXFLD ) {
-	//if ( ( write_flag == WRITE_TAG || write_flag == FMT_TAG_OPN ) && i < MAXFLD ) {
 			if ( c != PAIR_DELIM ) {
 				tag_arr[i++] = c;
 			}
@@ -166,16 +167,8 @@ struct arr_builder build_arrays(char c, int write_flag) {
 	}
 	val_arr[j] = '\0';
 	
-	/* WRITE FORMAT TAG TO ITS ARRAY */
-	if ( write_flag == WRITE_FMT_OPN && i < MAXFLD ) {
-		if ( c != FMT_DELIM ) {
-			tag_arr[i++] = c;
-		}
-		tag_arr[i] = '\0';
-	}
-	
 	/* COPY ARRAYS TO STRUCT */	
-	if ( write_flag == WRITE_NONE || ( write_flag == WRITE_FMT_OPN && c == FMT_DELIM ) ) {
+	if ( write_flag == WRITE_NONE ) {
 			strcpy(ab.tag, tag_arr);
 			strcpy(ab.val, val_arr);
 			i = 0; j = 0;
@@ -185,7 +178,7 @@ struct arr_builder build_arrays(char c, int write_flag) {
 	strcpy(ab.tag, "\0"); strcpy(ab.val, "\0");
 	return ab;
 }
-/* END build_arrays */
+/* END build_table */
 
 /**
  *	mail_merge (char c, int write_flag)
@@ -200,47 +193,17 @@ struct arr_builder build_arrays(char c, int write_flag) {
  *	history: 2014-11-08 version 1
  **/
  
- void	mailmerge( symtab_t *tp, FILE *fp) {
+void	mailmerge( symtab_t *tp, FILE *fp) {
 	
 	int c, write_flag = WRITE_FMT_CLS;
-	static char tag_arr[MAXFLD + 1] = "\0", un_tag_arr[MAXFLD + 1] = "\0";
-	static int i = 0;
-	struct arr_builder curr_fmt_tag;
 	
 	if ( strcmp(firstword(tp), SYM_TAB_END_OF_RECORD) == 0 && table_len(tp) > 1) {
 			while( ( c = fgetc(fp)) != EOF ) {
-				if ( c == FMT_DELIM && write_flag == WRITE_FMT_CLS ) { /* opening % is encountered */
+				if ( c == FMT_DELIM && write_flag == WRITE_FMT_CLS ) { /* % is encountered */
 					write_flag = WRITE_FMT_OPN;
 				}
 				else if ( write_flag == WRITE_FMT_OPN ) {
-					if ( c == DEFAULT_REC_DELIM ) {
-						fatal("Badly formed format file, no closing format tag before end of record", " ");
-					}
-					if ( c != FMT_DELIM ) { /* ... build up fmt tag array ... */
-						//tag_arr[i++] = c;
-						curr_fmt_tag = build_arrays(c, write_flag);
-					}
-					else if ( i == 0 ) { /* ... an escaped percent sign, output % to stdout ... */
-						putchar('%');
-						write_flag = WRITE_FMT_CLS;
-					}
-					else if ( strlen(curr_fmt_tag.tag) > 1 ) {
-						//tag_arr[i] = '\0'; /* close tag string */
-						if ( (in_table(tp, curr_fmt_tag.tag) ) ) { /* tag_arr in table */
-							printf("%s", (lookup(tp, curr_fmt_tag.tag)));
-						} 
-						//else if ( tag_arr[0] == UN_FMT_DELIM ) { /* tag_arr a system var? */
-						else if ( curr_fmt_tag.tag[0] == UN_FMT_DELIM ) { /* tag_arr a system var? */
-							//strcpy(un_tag_arr, tag_arr+1);
-							strcpy(un_tag_arr, curr_fmt_tag.tag+1);
-							fflush(stdout);
-							table_export(tp);
-							system(un_tag_arr);
-						} 
-						tag_arr[0] = un_tag_arr[0] = '\0'; /* resets for next iter */
-						i = 0;
-						write_flag = WRITE_FMT_CLS;
-					}
+					write_flag = write_fmt_tag(c, write_flag, tp);
 				}
 				else {
 					putchar(c);
@@ -250,3 +213,35 @@ struct arr_builder build_arrays(char c, int write_flag) {
 	}
 }
 /* END mail_merge */
+
+int write_fmt_tag(int c, int write_flag, symtab_t *tp) {
+	static char tag_arr[MAXFLD + 1] = "\0", un_tag_arr[MAXFLD + 1] = "\0";
+	static int i = 0;
+
+	if ( c == DEFAULT_REC_DELIM ) {
+			fatal("Badly formed format file", " ");
+		}
+		if ( c != FMT_DELIM ) {
+			tag_arr[i++] = c;
+		}
+		else if ( i == 0 ) { /* ... an escaped percent sign, output % to stdout ... */
+			putchar(c);
+			write_flag = WRITE_FMT_CLS;
+		}
+		else if ( strlen(tag_arr) > 1 ) {
+			tag_arr[i] = '\0'; /* close tag string */
+			if ( (in_table(tp, tag_arr) ) ) { /* tag_arr in table */
+				printf("%s", (lookup(tp, tag_arr)));
+			} 
+			else if ( tag_arr[0] == UN_FMT_DELIM ) { /* tag_arr a system var? */
+				strcpy(un_tag_arr, tag_arr+1);
+				fflush(stdout);
+				table_export(tp);
+				system(un_tag_arr);
+			} 
+			tag_arr[0] = un_tag_arr[0] = '\0'; /* resets for next iter */
+			i = 0;
+			write_flag = WRITE_FMT_CLS;
+		}
+		return write_flag;
+}
