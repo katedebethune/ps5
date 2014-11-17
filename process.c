@@ -63,45 +63,30 @@ int get_record(symtab_t *tp, FILE *fp, char ent_delim, char rec_delim )
 			if ( isalpha(c) ) {
 				write_flag = WRITE_TAG; /* open WRITE_TAG */
 			}
+			if ( c == PAIR_DELIM ) { /* no fieldname */
+				fatal("Badly formed data file", " ");
+			}
 			if ( c == EOF ) { /* exit loop */
 				break;
 			}
-			if ( c == PAIR_DELIM ) {
-				fatal("Badly formed data file", " ");
-			}
 				
 		}
-		//else if ( prevchar == PAIR_DELIM && ( c == ent_delim || c == rec_delim ) ) { /* = and ; adjacent */
-		//	write_flag = WRITE_NONE;
-		//}
-		//else if ( write_flag == WRITE_TAG && prevchar == PAIR_DELIM ) { /* open WRITE_VAL */
-		//	write_flag = WRITE_VAL;
-		//}
 		else if ( prevchar == PAIR_DELIM ) {
-			if ( c == ent_delim || c == rec_delim ) {
+			if ( c == ent_delim || c == rec_delim ) { /* = & ; are adjacent, check this*/
 				write_flag = WRITE_NONE;
 			}
-			if ( write_flag == WRITE_TAG ) {
+			if ( write_flag == WRITE_TAG ) { /* open WRITE_VAL */
 				write_flag = WRITE_VAL;
 			}
 		}
 		else if ( write_flag == WRITE_VAL && ( c == ent_delim || c == rec_delim ) ) { /* reset to WRITE_NONE */
 			write_flag = WRITE_NONE;
 		}
-		/* Case 4 - call to error - WRITE_TAG does not see its proper closing delimiter (PAIR_DELIM) */
-		//else if ( (write_flag == WRITE_TAG && prevchar == ent_delim) || (write_flag == WRITE_TAG && c == rec_delim) ) {
-		//		fatal("Badly formed data file", " ");		
-		//}
-		else if ( write_flag == WRITE_TAG && ( prevchar == ent_delim ||  c == rec_delim) ) {
+		else if ( write_flag == WRITE_TAG && 
+			( prevchar == ent_delim ||  c == rec_delim) ) { /* field missing = */
 				fatal("Badly formed data file", " ");		
 		}
-		
-		/* Case 4a - WRITE_TAG is set, but more PAIR_DELIMS are seen before the ent_delim or rec_delim */
-		//else if ( write_flag == WRITE_NONE && c == PAIR_DELIM ) {
-		//		fatal("Badly formed data file", " ");		
-		//}
 		curr_vals = build_arrays(c, write_flag);
-		//return build_list(curr_vals, write_flag, c, prevchar); 
 		if ( write_flag == WRITE_NONE ) {
 			if ( strcmp(curr_vals.tag, "\0") != 0 ) {
 				insert( tp, curr_vals.tag, curr_vals.val );
@@ -222,17 +207,13 @@ if ( write_flag == WRITE_NONE ) {
 					write_flag = WRITE_FMT_OPN;
 				}
 				else if ( write_flag == WRITE_FMT_OPN ) {
-					if ( c == DEFAULT_REC_DELIM ) {
+					if ( c == DEFAULT_REC_DELIM || c == EOF ) { /* at line/file end with no closing fmt tag */
 						fatal("Badly formed format file", " ");
 					}
 					if ( c != FMT_DELIM ) {
 						tag_arr[i++] = c;
 					}
-					else if ( i == 0 ) { /* ... an escaped % sign, output % to stdout ... */
-						putchar(c);
-						write_flag = WRITE_FMT_CLS;
-					}
-					else if ( strlen(tag_arr) > 1 ) {
+					else if ( strlen(tag_arr) > 0 ) {
 						tag_arr[i] = '\0'; /* close tag string */
 						if ( (in_table(tp, tag_arr) ) ) { /* check if tag_arr in table */
 							printf("%s", (lookup(tp, tag_arr)));
@@ -243,6 +224,12 @@ if ( write_flag == WRITE_NONE ) {
 							table_export(tp);
 							system(un_tag_arr);
 						} 
+					//else if ( strlen(tag_arr) == 0 ) { 
+					else { /* ... an escaped % sign, output % to stdout ... */
+						putchar(c);
+						write_flag = WRITE_FMT_CLS;
+					}
+					
 						tag_arr[0] = un_tag_arr[0] = '\0'; /* resets for next iter */
 						i = 0;
 						write_flag = WRITE_FMT_CLS;
