@@ -1,0 +1,119 @@
+Script started on Tue 18 Nov 2014 12:10:38 AM EST
+debethune@ice3:~/ps5$ cat sample.fmt
+                                            %!date | awk '{print $2,$3,$6}'%
+	Dear %title% %lastname%,
+
+	You and the 5%% of  everyone at %address% will be delighted to hear
+	that you may already have won a major prize in the
+	CSCI sweepstakes.  Yes, %firstname%, you may be the
+	person in %city% to be the lucky winner of a new jet 
+	aircraft, ocean liner, or luxury vacation.  Read on..
+
+debethune@ice3:~/ps5$ cat sample.dat
+title=Mr.;firstname=Alan;lastname=Arlington;address=12 Apple Lane;city=Sometown
+title=Ms.;firstname=Barbara;lastname=Berkeley;address=23 Birch Ave;city=Uptown
+title=Mrs.;firstname=Carol;lastname=Clarendon;address=34 Clover Drive;city=Sometown
+title=Adm.;firstname=D.;lastname=Dartmouth;address=45 Daffodil Blvd;city=Uptown
+title=Dr.;firstname=Eric;lastname=Exeter;address=56 Elm Street;city=Uptown
+title=The Rev.;firstname=Francis;lastname=Fairfield;address=67 Flax Circle;city=Downtown
+title=Miss;firstname=Gail;lastname=Gloucester;address=78 Gull Walk;city=Uptown
+title=Mr.;firstname=Henry;lastname=Hereford;address=89 Hawk Road;city=Downtown
+lastname=Ipswich;firstname=Imogene;address=100 Indigo Way;title=;city=Uptown
+
+lastnamefirstnamemiddlenamelastnamelastnamelastnamelastname=Jenkins;firstname=Loremipsumdolorsitamet,consecteturadipiscingelit.Suspendissevehiculanibhullamcorper,consecteturipsumvel,scelerisqueex.Namaipsumultricies,hendrerieratet,
+;;;;
+firstname=John
+name=Jane;    city=Boston;   ;;    college major=Chemistry
+abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz=Jane;      city=Bosotn;   ; ; ; ; college major=Chemistry=physics
+lastname=name=3;firstname=lastname=name
+title=;firstname=;lastname=;address=;city=
+name=Luke;lastnameTheCat;owner=mike
+=mike;lastname=TheCat;firstname=Luke
+name=Luke;=TheCat;owner=mike
+name=Luke;lastname=TheCat;=mike
+name=Luke;lastname=TheCat;ownermike
+firstname=Jane;lastname=Burke;city=Worcester;college major=English Literature
+firstname=June;lastname=Cooper;city=Springfield;college major=Physicse
+firstname=John;lastname=Dellinger;city=Bridgeport;college major=French
+firstname=Joe;lastname=Elldridge;city=Hartford;college major=Biochemistry & German
+
+debethune@ice3:~/ps5$ cat sample6[K8.dat
+title=Mr.
+firstname=Alan
+lastname=Arlington
+address=12 Apple Lane
+city=Sometown#title=Ms.
+firstname=Barbara
+lastname=Berkeley
+address=23 Birch Ave
+city=Uptown#title=Mrs.
+firstname=Carol
+lastname=Clarendon
+address=34 Clover Drive
+city=Sometown#title=Adm.
+firstname=D.
+lastname=Dartmouth
+address=45 Daffodil Blvd
+city=Uptown#title=Dr.
+firstname=Eric
+lastname=Exeter
+address=56 Elm Street
+city=Uptown#title=The Rev.
+firstname=Francis
+lastname=Fairfield
+address=67 Flax Circle
+city=Downtown#title=Miss
+firstname=Gail
+lastname=Gloucester
+address=78 Gull Walk
+city=Uptown#title=Mr.
+firstname=Henry
+lastname=Hereford
+address=89 Hawk Road
+city=Downtown#lastname=Ipswich
+firstname=Imogene
+address=100 Indigo Way
+title=
+city=Uptown#
+
+
+
+#firstname=John#name=Jane
+    city=Boston
+   
+
+    college major=Chemistry#
+
+debethune@ice3:~/ps5$ cat sample5[K6.dat
+title=Mr.@firstname=Alan@lastname=Arlington@address=12 Apple Lane@city=Sometown#title=Ms.@firstname=Barbara@lastname=Berkeley@address=23 Birch Ave@city=Uptown#title=Mrs.@firstname=Carol@lastname=Clarendon@address=34 Clover Drive@city=Sometown#title=Adm.@firstname=D.@lastname=Dartmouth@address=45 Daffodil Blvd@city=Uptown#title=Dr.@firstname=Eric@lastname=Exeter@address=56 Elm Street@city=Uptown#title=The Rev.@firstname=Francis@lastname=Fairfield@address=67 Flax Circle@city=Downtown#title=Miss@firstname=Gail@lastname=Gloucester@address=78 Gull Walk@city=Uptown#title=Mr.@firstname=Henry@lastname=Hereford@address=89 Hawk Road@city=Downtown#lastname=Ipswich@firstname=Imogene@address=100 Indigo Way@title=@city=Uptown#@@@@#firstname=John#name=Jane@    city=Boston@   @@    college major=Chemistry#
+debethune@ice3:~/ps5$ cat sample1.fmt
+                                            %!date | awk '{print $2,$3,$6}'%
+	Dear %firstname%,
+
+	You and the 5%% of  everyone at %address% will be delighted to hear
+	that you may already have won a major prize in the
+	CSCI sweepstakes.  Yes, %firstname%, you may be the
+	person in %city% graduating in  %college major% to be the receiving
+	a message from %!hostname%. Oh, consider yourself to be SO lucky.
+	But, in case that weren't cause enough to celebrate consider that you
+	could also be the winner of a new jet aircraft, ocean liner,
+	or luxury vacation.  Read on..
+
+	_______
+	|     |
+	|     |
+        | @ @ |
+	|  |  |
+	| `-` |
+	|     |
+	-------
+debethune@ice3:~/ps5$ cat sample10.dat
+firstname=Jane;lastname=Burke;city=Worcester;college major=English Literature
+firstname=June;lastname=Cooper;city=Springfield;college major=Physicse
+firstname=John;lastname=Dellinger;city=Bridgeport;college major=French
+firstname=Joe;lastname=Elldridge;city=Hartford;college major=Biochemistry & German
+
+debethune@ice3:~/ps5$ exit
+exit
+
+Script done on Tue 18 Nov 2014 12:12:54 AM EST
