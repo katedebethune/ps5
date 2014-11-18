@@ -66,17 +66,9 @@ int get_record(symtab_t *tp, FILE *fp, char ent_delim, char rec_delim )
 		curr_vals = build_table(c, write_flag);
 		if ( write_flag == WRITE_NONE ) {
 			if ( strcmp(curr_vals.tag, "\0") != 0 ) { /* the tag is not an empty string */
-				insert( tp, curr_vals.tag, curr_vals.val );
+				insert( tp, curr_vals.tag, curr_vals.val ); /* insert into symtab */
 			}
-			//if ( c == EOF ) {
-			//	printf("\nINSIDE EOF block - is this needed??\n");
-			//	if ( prevchar != rec_delim ) {
-			//		insert( tp, SYM_TAB_END_OF_RECORD, SYM_TAB_END_OF_RECORD);
-			//	}
-			//	return NO;
-			//}
-			//else if ( c == rec_delim ) {
-			if ( c == rec_delim ) {
+			if ( c == rec_delim ) { /* mark the end of the record in the symtab */
 				insert( tp, SYM_TAB_END_OF_RECORD, SYM_TAB_END_OF_RECORD);
 				return YES;
 			}
@@ -85,7 +77,7 @@ int get_record(symtab_t *tp, FILE *fp, char ent_delim, char rec_delim )
 	}
 	return NO;
 }
-/* END get_record() 30 lines*/
+/* END get_record() 22 lines*/
 
 /**
  *	set_write_flag(int c, int prevchar, int write_flag, char ent_delim, char rec_delim)
@@ -117,13 +109,15 @@ int get_record(symtab_t *tp, FILE *fp, char ent_delim, char rec_delim )
 			write_flag = WRITE_VAL;
 		}
 		/* Case 3 at the end of writing the value to its array, change flag to WRITE_NONE */
-		else if ( (write_flag == WRITE_VAL && c == ent_delim) || (write_flag == WRITE_VAL && c == rec_delim) ) {
+		//else if ( (write_flag == WRITE_VAL && c == ent_delim) || (write_flag == WRITE_VAL && c == rec_delim) ) {
+		else if ( write_flag == WRITE_VAL && ( c == ent_delim || c == rec_delim) )  {
 			write_flag = WRITE_NONE;
 		}
 		/* Case 4 - call to error - WRITE_TAG does not see its proper closing delimiter (PAIR_DELIM) */
 		/* in English: the WRITE_TAG value does not include '=' */
-		else if ( (write_flag == WRITE_TAG && prevchar == ent_delim) 
-			|| (write_flag == WRITE_TAG && c == rec_delim) ) {
+		//else if ( (write_flag == WRITE_TAG && prevchar == ent_delim) 
+		//	|| (write_flag == WRITE_TAG && c == rec_delim) ) {
+		else if ( write_flag == WRITE_TAG && ( prevchar == ent_delim || c == rec_delim ) ) {
 				fatal("Badly formed data file, no '=' found to close tag", " ");		
 		}
 		/* Case 4a - WRITE_TAG is set, but more PAIR_DELIMS are seen before the ent_delim or rec_delim */
@@ -171,7 +165,7 @@ struct arr_builder build_table(char c, int write_flag) {
 	if ( write_flag == WRITE_NONE ) {
 			strcpy(ab.tag, tag_arr);
 			strcpy(ab.val, val_arr);
-			i = 0; j = 0;
+			i = j = 0;
 			tag_arr[i] = val_arr[j] = '\0';
 			return ab;
 	}
@@ -181,21 +175,19 @@ struct arr_builder build_table(char c, int write_flag) {
 /* END build_table  30 lines */
 
 /**
- *	mail_merge (char c, int write_flag)
+ *	mail_merge (symtab_t *tp, FILE *fp)
  *
- *	Purpose: helper method for get_record, uses the current c
- *			 and write_status flag to build up arrays for storage in symtab.
- *	Input:   char c  - the current char
- *		 	 int write_flag	-the current write process
- *	Output:  stores tag and value arrays in a struct, returns this 
- *			 to get_record() for further processing.
+ *	Purpose: helper method for process(), prints format text with
+ *			 replacement values inserted in the appropriate spots.
+ *	Input:   symtab_t *tp - the current symbol table
+ * 			 FILE *fp - the file stream for the format file
+ *	Output:  format text with replacement values to stdout
  *	Errors:  not reported.
  *	history: 2014-11-08 version 1
  **/
  
 void	mailmerge( symtab_t *tp, FILE *fp) {
 	
-	//show_table(tp);
 	int c, write_flag = WRITE_FMT_CLS;
 	
 	if ( strcmp(firstword(tp), SYM_TAB_END_OF_RECORD) == 0 && table_len(tp) > 1) {
@@ -218,14 +210,17 @@ void	mailmerge( symtab_t *tp, FILE *fp) {
 /**
  *	write_fmt_tag(int c, int write_flag, symtab_t *tp) 
  *
- *	Purpose: helper method for get_record, uses the current c
- *			 and write_status flag to build up arrays for storage in symtab.
+ *	Purpose: helper method for mailmerge builds format tags, then writes
+ * 			 corresponding values to stdout. 
  *	Input:   char c  - the current char
  *		 	 int write_flag	-the current write process
- *	Output:  stores tag and value arrays in a struct, returns this 
- *			 to get_record() for further processing.
+ *			 symtab_t *tp - the current symbol table
+ *	Output:  maps format tags to data fields and outputs data values to
+ *			 stdout in the appropriate spots. Identifies system variables
+ *	  		 and outputs these to the appropriate spots.
+ *  Return:  write_flag to the mailmerge process
  *	Errors:  not reported.
- *	history: 2014-11-08 version 1
+ *	history: 2014-11-17 version 1
  **/
 
 int write_fmt_tag(int c, int write_flag, symtab_t *tp) {
@@ -245,13 +240,13 @@ int write_fmt_tag(int c, int write_flag, symtab_t *tp) {
 		else if ( strlen(tag_arr) > 1 ) {
 			tag_arr[i] = '\0'; /* close tag string */
 			if ( (in_table(tp, tag_arr) ) ) { /* tag_arr in table */
-				printf("%s", (lookup(tp, tag_arr)));
+				printf("%s", (lookup(tp, tag_arr))); /* get value for that tag */
 			} 
 			else if ( tag_arr[0] == UN_FMT_DELIM ) { /* tag_arr a system var? */
-				strcpy(un_tag_arr, tag_arr+1);
-				fflush(stdout);
+				strcpy(un_tag_arr, tag_arr+1); /* create un_tag_arr */
+				fflush(stdout); /* set the environment */
 				table_export(tp);
-				system(un_tag_arr);
+				system(un_tag_arr); /* output system variable */
 			} 
 			tag_arr[0] = un_tag_arr[0] = '\0'; /* resets for next iter */
 			i = 0;
