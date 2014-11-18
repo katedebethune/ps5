@@ -31,3 +31,6 @@ int	get_record(symtab_t *, FILE *, char ent_delim, char rec_delim);
 void	mailmerge( symtab_t *, FILE *);
 int	process(FILE*, FILE*, char ent_delim, char rec_delim);
 void	fatal(char *, char *);
+struct arr_builder build_table(char c, int write_flag);
+int set_write_flag(int c, int prevchar, int write_flag, char ent_delim, char rec_delim);
+int write_fmt_tag(int c, int write_flag, symtab_t *tp);

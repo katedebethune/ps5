@@ -221,6 +221,16 @@ delete( symtab_t *tp, char str[] )
  *  clear_table(tp) - clears out all nodes from the table
  *		    - and resets head pointer to NULL
  */
+
+/**
+ *	clear_table(tp)
+ *
+ *	Purpose: clears all nodes from current table;
+ *  		 resets head pointer to NULL
+ *	Input:   a pointer to tp - the current symbol table
+ *
+ *	history: 2014-11-07 v.1
+ **/
 void
 clear_table(symtab_t *tp)
 {

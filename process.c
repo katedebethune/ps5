@@ -99,27 +99,20 @@ int get_record(symtab_t *tp, FILE *fp, char ent_delim, char rec_delim )
 		if ( write_flag == WRITE_NONE && isalpha(c) ) {
 			write_flag = WRITE_TAG;		
 		}
-		/* Case 2a, there is no value string: '=' and ';' sit next to each other */
+		/* Case 2, WRITE_TAG open */
 		else if ( prevchar == PAIR_DELIM ) {
 			if ( c == ent_delim || c == rec_delim ) {
-				write_flag = WRITE_NONE;
+				write_flag = WRITE_NONE; /* no value string: '=' & ';' adjacent */
 			}
-			if ( write_flag == WRITE_TAG ) {
+			if ( write_flag == WRITE_TAG ) { /* tag boundary reached: chg to WRITE_VAL */
 				write_flag = WRITE_VAL;
 			}
 		}
-		//else if ( prevchar == PAIR_DELIM && ( c == ent_delim  || c == rec_delim) ) {
-		//	write_flag = WRITE_NONE;
-		//}
-		/* Case 2 - at the end of writing the tag to the array, change flag to WRITE_VAL */
-		//else if ( prevchar == PAIR_DELIM && write_flag == WRITE_TAG ) {
-		//	write_flag = WRITE_VAL;
-		//}
-		/* Case 3 at the end of writing the value to its array, change flag to WRITE_NONE */
+		/* Case 3, value boundary reached: chg to WRITE_NONE */
 		else if ( write_flag == WRITE_VAL && ( c == ent_delim || c == rec_delim) )  {
 			write_flag = WRITE_NONE;
 		}
-		/* Case 4 - call to error - WRITE_TAG does not see its proper closing delimiter (PAIR_DELIM) */
+		/* Case 4 - call to error - WRITE_TAG does not encounter closing delimiter */
 		/* in English: the WRITE_TAG value does not include '=' */
 		else if ( write_flag == WRITE_TAG && ( prevchar == ent_delim || c == rec_delim ) ) {
 				fatal("Badly formed data file, no '=' found to close tag", " ");		
@@ -131,7 +124,7 @@ int get_record(symtab_t *tp, FILE *fp, char ent_delim, char rec_delim )
 		}
 		return write_flag;
  }
- /* END set_write_flag() 30 lines */
+ /* END set_write_flag() 29 lines */
 
 /**
  *	build_table(char c, int write_flag)
@@ -196,7 +189,7 @@ void	mailmerge( symtab_t *tp, FILE *fp) {
 	
 	if ( strcmp(firstword(tp), SYM_TAB_END_OF_RECORD) == 0 && table_len(tp) > 1) {
 			while( ( c = fgetc(fp)) != EOF ) {
-				if ( c == FMT_DELIM && write_flag == WRITE_FMT_CLS ) { /* % is encountered */
+				if ( c == FMT_DELIM && write_flag == WRITE_FMT_CLS ) { /* opening % is encountered */
 					write_flag = WRITE_FMT_OPN;
 				}
 				else if ( write_flag == WRITE_FMT_OPN ) {
