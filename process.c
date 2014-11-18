@@ -7,7 +7,6 @@
 
 struct arr_builder build_table(char c, int write_flag);
 int set_write_flag(int c, int prevchar, int write_flag, char ent_delim, char rec_delim);
-//struct arr_builder build_fmt_tag(char c, int write_flag);
 int write_fmt_tag(int c, int write_flag, symtab_t *tp);
 
 /**
@@ -35,7 +34,7 @@ int process(FILE *fmt, FILE *data, char ent_delim, char rec_delim)
 	free_table(tab); 			/* no memory leaks!	*/
 	return(0);			
 }
-/* END process() */
+/* END process() 14 lines */
 
 /**
  *	get_record(symtab_t *tp, FILE *fp)
@@ -59,24 +58,25 @@ int get_record(symtab_t *tp, FILE *fp, char ent_delim, char rec_delim )
 	int c, prevchar = '\0', write_flag = WRITE_NONE;
 	struct arr_builder curr_vals;
 
-	while( ( c = fgetc(fp) ) ) 
-	{
+	while( ( c = fgetc(fp) ) ) {
 		if ( write_flag == WRITE_NONE && c == EOF ) {
 			break;
 		}
 		write_flag = set_write_flag(c, prevchar, write_flag, ent_delim, rec_delim);
 		curr_vals = build_table(c, write_flag);
 		if ( write_flag == WRITE_NONE ) {
-			if ( strcmp(curr_vals.tag, "\0") != 0 ) {
+			if ( strcmp(curr_vals.tag, "\0") != 0 ) { /* the tag is not an empty string */
 				insert( tp, curr_vals.tag, curr_vals.val );
 			}
-			if ( c == EOF ) {
-				if ( prevchar != rec_delim ) {
-					insert( tp, SYM_TAB_END_OF_RECORD, SYM_TAB_END_OF_RECORD);
-				}
-				return NO;
-			}
-			else if ( c == rec_delim ) {
+			//if ( c == EOF ) {
+			//	printf("\nINSIDE EOF block - is this needed??\n");
+			//	if ( prevchar != rec_delim ) {
+			//		insert( tp, SYM_TAB_END_OF_RECORD, SYM_TAB_END_OF_RECORD);
+			//	}
+			//	return NO;
+			//}
+			//else if ( c == rec_delim ) {
+			if ( c == rec_delim ) {
 				insert( tp, SYM_TAB_END_OF_RECORD, SYM_TAB_END_OF_RECORD);
 				return YES;
 			}
@@ -85,7 +85,7 @@ int get_record(symtab_t *tp, FILE *fp, char ent_delim, char rec_delim )
 	}
 	return NO;
 }
-/* END get_record() */
+/* END get_record() 30 lines*/
 
 /**
  *	set_write_flag(int c, int prevchar, int write_flag, char ent_delim, char rec_delim)
@@ -133,7 +133,7 @@ int get_record(symtab_t *tp, FILE *fp, char ent_delim, char rec_delim )
 		}
 		return write_flag;
  }
- /* END set_write_flag() */
+ /* END set_write_flag() 30 lines */
 
 /**
  *	build_table(char c, int write_flag)
@@ -178,7 +178,7 @@ struct arr_builder build_table(char c, int write_flag) {
 	strcpy(ab.tag, "\0"); strcpy(ab.val, "\0");
 	return ab;
 }
-/* END build_table */
+/* END build_table  30 lines */
 
 /**
  *	mail_merge (char c, int write_flag)
@@ -195,6 +195,7 @@ struct arr_builder build_table(char c, int write_flag) {
  
 void	mailmerge( symtab_t *tp, FILE *fp) {
 	
+	//show_table(tp);
 	int c, write_flag = WRITE_FMT_CLS;
 	
 	if ( strcmp(firstword(tp), SYM_TAB_END_OF_RECORD) == 0 && table_len(tp) > 1) {
@@ -212,7 +213,20 @@ void	mailmerge( symtab_t *tp, FILE *fp) {
 			fseek(fp, 0L, 0);
 	}
 }
-/* END mail_merge */
+/* END mail_merge() 18 lines */
+
+/**
+ *	write_fmt_tag(int c, int write_flag, symtab_t *tp) 
+ *
+ *	Purpose: helper method for get_record, uses the current c
+ *			 and write_status flag to build up arrays for storage in symtab.
+ *	Input:   char c  - the current char
+ *		 	 int write_flag	-the current write process
+ *	Output:  stores tag and value arrays in a struct, returns this 
+ *			 to get_record() for further processing.
+ *	Errors:  not reported.
+ *	history: 2014-11-08 version 1
+ **/
 
 int write_fmt_tag(int c, int write_flag, symtab_t *tp) {
 	static char tag_arr[MAXFLD + 1] = "\0", un_tag_arr[MAXFLD + 1] = "\0";
@@ -245,3 +259,4 @@ int write_fmt_tag(int c, int write_flag, symtab_t *tp) {
 		}
 		return write_flag;
 }
+/* END write_fmt_tag() 30 lines  */
