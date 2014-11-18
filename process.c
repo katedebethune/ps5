@@ -100,23 +100,27 @@ int get_record(symtab_t *tp, FILE *fp, char ent_delim, char rec_delim )
 			write_flag = WRITE_TAG;		
 		}
 		/* Case 2a, there is no value string: '=' and ';' sit next to each other */
-		else if ( (c == ent_delim && prevchar == PAIR_DELIM) 
-			|| (c == rec_delim && prevchar == PAIR_DELIM ) ) {
-			write_flag = WRITE_NONE;
+		else if ( prevchar == PAIR_DELIM ) {
+			if ( c == ent_delim || c == rec_delim ) {
+				write_flag = WRITE_NONE;
+			}
+			if ( write_flag == WRITE_TAG ) {
+				write_flag = WRITE_VAL;
+			}
 		}
+		//else if ( prevchar == PAIR_DELIM && ( c == ent_delim  || c == rec_delim) ) {
+		//	write_flag = WRITE_NONE;
+		//}
 		/* Case 2 - at the end of writing the tag to the array, change flag to WRITE_VAL */
-		else if ( write_flag == WRITE_TAG && prevchar == PAIR_DELIM ) {
-			write_flag = WRITE_VAL;
-		}
+		//else if ( prevchar == PAIR_DELIM && write_flag == WRITE_TAG ) {
+		//	write_flag = WRITE_VAL;
+		//}
 		/* Case 3 at the end of writing the value to its array, change flag to WRITE_NONE */
-		//else if ( (write_flag == WRITE_VAL && c == ent_delim) || (write_flag == WRITE_VAL && c == rec_delim) ) {
 		else if ( write_flag == WRITE_VAL && ( c == ent_delim || c == rec_delim) )  {
 			write_flag = WRITE_NONE;
 		}
 		/* Case 4 - call to error - WRITE_TAG does not see its proper closing delimiter (PAIR_DELIM) */
 		/* in English: the WRITE_TAG value does not include '=' */
-		//else if ( (write_flag == WRITE_TAG && prevchar == ent_delim) 
-		//	|| (write_flag == WRITE_TAG && c == rec_delim) ) {
 		else if ( write_flag == WRITE_TAG && ( prevchar == ent_delim || c == rec_delim ) ) {
 				fatal("Badly formed data file, no '=' found to close tag", " ");		
 		}
